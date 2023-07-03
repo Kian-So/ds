@@ -1,0 +1,307 @@
+ #include <iostream>
+ #include <string>
+ #include <cstdlib>
+ #include <chrono>
+ #include <random>
+ using namespace std;
+ using namespace std::chrono;
+
+class node
+{
+	public:
+	long long Data;
+	node *LeftChild, *RightChild;
+};
+node* newNode(long long Data)
+{
+    node* temp = new node();
+    temp->Data = Data;
+    temp->LeftChild = temp->RightChild = NULL;
+    return (temp);
+}
+node *RightRotate(node* X)
+{
+    node* Y = X->LeftChild;
+    X->LeftChild = Y->RightChild;
+    Y->RightChild = X;
+    return Y;
+} 
+node *LeftRotate(node* X)
+{
+    node* Y = X->RightChild;
+    X->RightChild = Y->LeftChild;
+    Y->LeftChild = X;
+    return Y;
+} 
+node *splay(node *root, long long Data)
+{
+	
+	if (root == NULL || root->Data == Data)
+		return root;
+
+	if (root->Data > Data)
+	{
+		
+		if (root->LeftChild == NULL) return root;
+
+		
+		if (root->LeftChild->Data > Data)
+		{
+		
+			root->LeftChild->LeftChild = splay(root->LeftChild->LeftChild, Data);
+
+			root = RightRotate(root);
+		}
+		else if (root->LeftChild->Data < Data) 
+		{
+			root->LeftChild->RightChild = splay(root->LeftChild->RightChild, Data);
+
+			
+			if (root->LeftChild->RightChild != NULL)
+				root->LeftChild = LeftRotate(root->LeftChild);
+		}
+
+		
+		return (root->LeftChild == NULL)? root: RightRotate(root);
+	}
+	else 
+	{
+		
+		if (root->RightChild == NULL) return root;
+
+
+		if (root->RightChild->Data > Data)
+		{
+		
+			root->RightChild->LeftChild = splay(root->RightChild->LeftChild, Data);
+
+			if (root->RightChild->LeftChild != NULL)
+				root->RightChild = RightRotate(root->RightChild);
+		}
+		else if (root->RightChild->Data < Data)
+		{
+
+			root->RightChild->RightChild = splay(root->RightChild->RightChild, Data);
+			root = LeftRotate(root);
+		}
+
+
+		return (root->RightChild == NULL)? root: LeftRotate(root);
+	}
+}
+node *Add(node *Rishe, long long Data)
+{
+
+    if (Rishe == NULL) return newNode(Data);
+    Rishe = splay(Rishe, Data);
+    if (Rishe->Data == Data) return Rishe;
+    node *newnode = newNode(Data);
+    if (Rishe->Data > Data)
+    {
+        newnode->RightChild = Rishe;
+        newnode->LeftChild = Rishe->LeftChild;
+        Rishe->LeftChild = NULL;
+    }
+    else
+    {
+        newnode->LeftChild = Rishe;
+        newnode->RightChild = Rishe->RightChild;
+        Rishe->RightChild = NULL;
+    }
+ 
+    return newnode; 
+}
+node *Delete(struct node* Rishe, long long Data)
+{
+    struct node* temp;
+    if (!Rishe)
+        return NULL;
+    Rishe = splay(Rishe, Data);
+    if (Data != Rishe->Data)
+        return Rishe;
+    if (!Rishe->LeftChild) {
+        temp = Rishe;
+        Rishe = Rishe->RightChild;
+    }
+    else {
+        temp = Rishe;
+        Rishe = splay(Rishe->LeftChild, Data);
+        Rishe->RightChild = temp->RightChild;
+    }
+    free(temp);
+    return Rishe;
+}
+node *Find(node *Rishe, long long Data)
+{
+    if (Rishe == NULL)
+        return Rishe;
+    else
+	    return splay(Rishe, Data);
+}
+node* Sum(struct node* Rishe, long long data1, long long data2)
+{
+    if (Rishe == NULL)
+    {
+        cout<<"0"<<endl;
+        return Rishe;
+    }
+    long long I, X=0;
+    for (I=data1; I<=data2; I++)
+    {
+        Rishe = Find(Rishe, I);
+        if (Rishe->Data == I)
+        {
+            X += I;
+        }
+    }
+    cout<<X<<endl;
+    return Rishe;
+}
+long  string_to_int(string number)
+{
+    long long i = 0;
+    for (char c : number) {
+        if (c >= '0' && c <= '9') {
+            i = i * 10 + (c - '0');
+        }
+    }
+    return i;
+}
+class Generator {
+    std::default_random_engine generator;
+    std::normal_distribution<double> distribution;
+    double min;
+    double max;
+public:
+    Generator(int mean, int stddev, long min, long max):
+        distribution(mean, stddev), min(min), max(max)
+    {}
+
+    double operator ()() {
+        while (true) {
+            double number = this->distribution(generator);
+            if (number >= this->min && number <= this->max)
+                return number;
+        }
+    }
+};
+// int main() 
+// {
+//     node *Rishe;
+//     string Function, Number1, Number2;
+//     long long InputNumber1, InputNumber2, X=0, I, N;
+//     cin>>N;
+//     string Input[N];
+//     cin.ignore();
+//     getline(std::cin, Input[0]);
+//     for (I=1; I<N; I++)
+//     {
+//         getline(std::cin, Input[I]);
+//     }
+//     for (I=0; I<N; I++)
+//     {
+//         Function="";
+//         Number1="";
+//         Number2="";
+//         X=0;
+//         while (!isspace(Input[I][X]) && isalpha(Input[I][X]))
+//         {
+//             Function += Input[I][X];
+//             X++;
+//         }
+//         X++;
+//         while (!isspace(Input[I][X]) && isdigit(Input[I][X]))
+//         {
+//             Number1 += Input[I][X];
+//             X++;
+//         }
+//         X++;
+//         while (!isspace(Input[I][X]) && isdigit(Input[I][X]))
+//         {
+//             Number2 += Input[I][X]; 
+//             X++;
+//         }
+//         InputNumber1 = string_to_int(Number1);
+//         InputNumber2 = string_to_int(Number2);
+//         if (Function == "add")
+//             Rishe = Add(Rishe, InputNumber1);
+//         else if (Function == "del")
+//         {
+//             if (Rishe == NULL)
+//                 {
+//                     X++;
+//                     X--;
+//                 }
+//             else
+//                 Rishe = Delete(Rishe, InputNumber1);
+//         }
+//         else if (Function == "find")
+//         {
+//             Rishe = Find(Rishe, InputNumber1);
+//             if (Rishe == NULL || Rishe->Data != InputNumber1)
+//                 cout<<"false"<<endl;
+//             else
+//                 cout<<"true"<<endl;
+//         }
+//         else if (Function == "sum")
+//         {
+//             if (Rishe == NULL)
+//                 cout<<0<<endl;
+//             else
+//                 Rishe = Sum(Rishe, InputNumber1, InputNumber2);
+//         }
+//     }
+// }
+
+int main()
+{
+    long RandomNumber1, RandomNumber2, RandomNumber3, I;
+    double elapsed_seconds;
+    node* Rishe2 = NULL;
+    cout<<"uniform distribution:"<<endl;
+    for (I=5; I<=10; I++)
+    {
+        auto start = high_resolution_clock::now();
+        srand(time(0));
+        RandomNumber1 = (rand() % (100 - 1 ) + 1);
+        cout<<"Generated random number is: "<<RandomNumber1<<endl;      
+        Rishe2 = Find(Rishe2, RandomNumber1);
+        if (Rishe2 == NULL || Rishe2->Data != RandomNumber1)
+        {
+            cout<<"Not founded"<<endl;
+            Rishe2 = Add(Rishe2, RandomNumber1);
+        }
+        else 
+        {
+            cout<<"Founded"<<endl;
+        }
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout <<"Time needed for this operation is: " << duration.count()<<" microseconds."<<endl;
+        cout<<endl;
+    }
+    cout<<"---------------------------------------------------------"<<endl;
+    cout<<"Normal distribution:"<<endl;
+    Rishe2 = NULL;
+    for (I=5; I<=10; I++)
+    {
+        auto start = high_resolution_clock::now();
+        srand(time(0));
+        Generator g(50, 25, 1, 10000);
+        cout<<"Generated random number is; "<<g()<<endl;
+        Rishe2 = Find(Rishe2, g());
+        if (Rishe2 == NULL || Rishe2->Data != g())
+        {
+            cout<<"Not founded"<<endl;
+            Rishe2 = Add(Rishe2, g());
+        }
+        else 
+        {
+            cout<<"Founded"<<endl;
+        }    
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout <<"Time needed for this operation is: " << duration.count()<<" microseconds."<<endl;
+        cout<<endl;
+    }
+}
